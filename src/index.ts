@@ -118,7 +118,7 @@ const handleTimeout = (
         pauseThenExit(1);
       } else {
         logger.info("Restart (apparently) succeeded");
-        logger.debug({ proc, targetProcess: state.targetProcess });
+        logger.trace({ proc, targetProcess: state.targetProcess });
 
         // Allow next ping to be sent, hopefully will get response when
         // application completes restart
@@ -193,13 +193,14 @@ const main = async () => {
       : undefined
   );
 
-  pongInput.onMessage((payload) => {
+  pongInput.onMessage((payload, topic) => {
     if (state.lastPingSentTime === null) {
       logger.debug("No ping sent from here; ignore this pong");
     } else {
       const now = Date.now();
       const elapsed = now - state.lastPingSentTime;
       const { timeout } = config.ping;
+      logger.info(`Received pong message on topic ${topic}`);
       logger.debug(`${elapsed}ms between ping => pong`);
 
       state.lastPingSentTime = now;
