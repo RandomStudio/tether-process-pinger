@@ -1,18 +1,18 @@
 # Tether Process Pinger
 
-This is a generic version of the "companion" app that has typically been used in our installations to run alongside of a very important process (e.g. graphical output from a browser window) where we wish to restart the process if it becomes unresponsive for some reason.
+This is a generic version of the "companion" app that has typically been used in our installations to run alongside a very important process (e.g. graphical output from a browser window) where we wish to restart the process if it becomes unresponsive for some reason.
 
 ## Why we need this
 
-We use a process manager such as PM2 to ensure that a set of applications
+We use a process manager such as PM2 to ensure that a set of applications:
 
 - start when the host finishes booting up
 - get configured properly (using command-line args, environment variables, etc.)
 - restart if the process crashes or exits, or exceeds certain bounds (e.g. memory usage)
 
-This covers most of what we typically need; however, it does not guarantee that we will get any notification or have any suitable action taken (e.g. restarting) if one of our processes is still running but has become unresponsive.
+This covers most of what we typically need; however, it does not guarantee that we will get any notification or have any suitable action taken (e.g. restarting) if one of our processes is **still running but has become unresponsive**.
 
-This is where the Process Pinger comes in: it sends a "ping" message via Tether, to which the target application is expected to respond with a corresponding "pong" message.
+This is where the Process Pinger comes in: it regularly sends a "ping" message via Tether, to which the target application is expected to respond with a corresponding "pong" message.
 
 ## Requirements for the target application
 
