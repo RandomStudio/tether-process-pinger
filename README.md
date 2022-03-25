@@ -10,9 +10,9 @@ We use a process manager such as PM2 to ensure that a set of applications:
 - get configured properly (using command-line args, environment variables, etc.)
 - restart if the process crashes or exits, or exceeds certain bounds (e.g. memory usage)
 
-This covers most of what we typically need; however, it does not guarantee that we will get any notification or have any suitable action taken (e.g. restarting) if one of our processes is **still running but has become unresponsive**.
+This covers most of what we typically need; however, it does not guarantee that we will get any notification or have any suitable action taken (e.g. restarting) if one of our processes is **still running but has become unresponsive**. This can happen in the case of memory leaks, for example, where the application (e.g. "web app" running in the browser) might gradually get slower and slower but does not ever actually crash, or takes a very long time to actually crash. As programmers we of course try to avoid such situations but when subtle bugs creep into long-running software it is better to have notifications and instrumentation (e.g. via Datadog) when this happens, and to have a "fallback" (restart the application!) if unexpected problems do occur. An occasional restart is better than a hanging/unresponsive screen.
 
-This is where the Process Pinger comes in: it regularly sends a "ping" message via Tether, to which the target application is expected to respond with a corresponding "pong" message.
+This is where the Process Pinger comes in: it regularly sends a "ping" message via Tether, to which the target application is expected to respond with a corresponding "pong" message. If the time between sending and receiving gets too long, it can notify us (via Datadog) and instruct PM2 to restart the process.
 
 ## Requirements for the target application
 
@@ -23,6 +23,8 @@ The only requirements on the target application are:
 - it should implement a Tether Agent connection
 - it should subscribe to "ping" messages (e.g on the topic `+/+/ping`)
 - it should publish messages on a topic ending in "pong", e.g. `someType/someAgentID/pong`
+
+More generally, you need to implement your applications (and systems) in such a way that a restart is **anticipated, even if it is not desirable**. Critical state information should preferably not get lost in the case of a restart at an awkward moment. "The show must go on"; your application should hopefully be back up and running as quickly as possible, and the rest of the system should be robust enough to either start over or pick up where you left off.
 
 ## Optional, but recommended: PM2 Integration
 
