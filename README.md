@@ -1,6 +1,6 @@
 # Tether Process Pinger
 
-This is a generic version of the "companion" app that has typically been used in our installations to run alongside a very important process (e.g. graphical output from a browser window) where we wish to restart the process if it becomes unresponsive for some reason.
+This is a generic version of the "companion" app that has typically been used in our installations to run alongside a Very Important Process™️ (e.g. graphical output from a browser window) where we wish to restart the process if it becomes unresponsive for some reason.
 
 ## Why we need this
 
@@ -42,7 +42,7 @@ The content (payload) of the `pong` messages can be left empty, too. However, it
 
 As mentioned above, Datadog will be used to relay metrics from the message contents of "pong" messages, if you choose to include these.
 
-In addition, this application will increment a `heartbeat` metric each time it receives a "pong" message. This can be useful to put on a Dashboard to keep an eye on your Super Important Process™️.
+In addition, this application will increment a `heartbeat` metric each time it receives a "pong" message. This can be useful to put on a Dashboard to keep an eye on your Very Important Process™️.
 
 Some Datadog Events are also generated, e.g. "error" events when the target application fails to respond in time.
 
