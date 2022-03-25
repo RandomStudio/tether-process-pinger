@@ -1,4 +1,5 @@
 const { TetherAgent } = require("@tether/tether-agent");
+const { encode } = require("@msgpack/msgpack");
 
 const main = async (failProbability) => {
   const agent = await TetherAgent.create("dummy");
@@ -11,7 +12,11 @@ const main = async (failProbability) => {
     const shouldRespond = Math.random() > failProbability;
     if (shouldRespond) {
       console.log("Responding with pong message");
-      pongOutput.publish();
+      const stats = {
+        fps: Math.random() * 60,
+        some: "string",
+      };
+      pongOutput.publish(encode(stats));
     } else {
       console.warn("Oopsie; not going to respond");
     }
