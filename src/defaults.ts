@@ -7,7 +7,6 @@ const defaults: Config = {
   ping: {
     interval: 15 * 1000,
     timeout: 5 * 1000,
-    tetherAgentId: "browser",
   },
   pm2: {
     enabled: true,

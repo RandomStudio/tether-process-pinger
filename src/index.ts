@@ -2,7 +2,7 @@
 import parse from "parse-strings-in-object";
 import rc from "rc";
 import { getLogger } from "log4js";
-import { TetherAgent } from "@tether/tether-agent";
+import { Output, TetherAgent } from "@tether/tether-agent";
 import { StatsD } from "hot-shots";
 import pm2Module from "pm2";
 
@@ -87,7 +87,11 @@ const setupPm2 = () => {
   });
 };
 
-const handleTimeout = (elapsed: number, timeout: number) => {
+const handleTimeout = (
+  elapsed: number,
+  timeout: number,
+  pingOutput: Output
+) => {
   logger.error(
     `Too much time elapsed since last ping was sent: ${elapsed} > ${timeout}`
   );
@@ -106,8 +110,36 @@ const handleTimeout = (elapsed: number, timeout: number) => {
     if (datadog) {
       datadog.increment("restartProcess");
     }
+  } else {
+    logger.info(
+      "No PM2 integration enabled; so we will try again with another ping"
+    );
+    pingOutput.publish();
   }
 };
+
+const decodeResponseBody = (payload: Buffer) => {
+  try {
+    const content = decode(payload) as object;
+    logger.info("Decoded pong message body:", JSON.stringify(content, null, 2));
+    const keys = Object.keys(content);
+    keys.forEach((key) => {
+      const value = content[key];
+      if (typeof value === "number") {
+        logger.debug("parsed value in", { key, value });
+        if (datadog && config.datadog.decodeStats) {
+          datadog.gauge(key, value);
+        }
+      } else {
+        logger.warn("Unknown value type for entry", { key, value });
+      }
+    });
+  } catch (e) {
+    logger.error("Error decoding pong message body:", e);
+  }
+};
+
+// =================================================================
 
 const main = async () => {
   if (pm2) {
@@ -128,7 +160,11 @@ const main = async () => {
       logger.warn(
         "lastPingSentTime has not been reset; still waiting for reply?"
       );
-      handleTimeout(now - state.lastPingSentTime, config.ping.timeout);
+      handleTimeout(
+        now - state.lastPingSentTime,
+        config.ping.timeout,
+        pingOutput
+      );
     }
   }, config.ping.interval);
 
@@ -153,29 +189,11 @@ const main = async () => {
         if (datadog) {
           datadog.increment("heartbeat");
         }
-        try {
-          const content = decode(payload) as object;
-          logger.info(
-            "Decoded pong message body:",
-            JSON.stringify(content, null, 2)
-          );
-          const keys = Object.keys(content);
-          keys.forEach((key) => {
-            const value = content[key];
-            if (typeof value === "number") {
-              logger.debug("parsed value in", { key, value });
-              if (datadog) {
-                datadog.gauge(key, value);
-              }
-            } else {
-              logger.warn("Unknown value type for entry", { key, value });
-            }
-          });
-        } catch (e) {
-          logger.error("Error decoding pong message body:", e);
+        if (payload.length > 0) {
+          decodeResponseBody(payload);
         }
       } else {
-        handleTimeout(elapsed, timeout);
+        handleTimeout(elapsed, timeout, pingOutput);
       }
     }
   });
