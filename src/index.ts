@@ -20,7 +20,12 @@ logger.info("started with config", config);
 
 // Datadog (optional)
 const datadog: StatsD | null = config.datadog.enabled
-  ? new StatsD({ globalTags: config.datadog.globalTags })
+  ? new StatsD({
+      globalTags: [
+        ...config.datadog.globalTags,
+        "targetApp:" + config.targetAppName,
+      ],
+    })
   : null;
 
 // PM2 (optional)
@@ -183,8 +188,14 @@ const main = async () => {
       const elapsed = now - state.lastPingSentTime;
       const { timeout } = config.ping;
       logger.debug(`${elapsed}ms between ping => pong`);
+
+      state.lastPingSentTime = now;
+
+      if (datadog) {
+        datadog.gauge("ping", elapsed);
+      }
       if (elapsed <= timeout) {
-        logger.debug("All good; reset for next ping interval");
+        logger.info("All good; reset for next ping interval");
         state.lastPingSentTime = null;
         if (datadog) {
           datadog.increment("heartbeat");
@@ -198,5 +209,13 @@ const main = async () => {
     }
   });
 };
+
+// =================================================================
+
+if (config.targetAppName === "unknown" || config.targetAppName === "") {
+  logger.warn(
+    `You should specify a target app name (you gave "${config.targetAppName}"); this does not need to be the same as the Tether AgentID or PM2 process name`
+  );
+}
 
 main();

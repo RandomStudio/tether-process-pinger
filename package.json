@@ -8,7 +8,8 @@
     "build": "npx tsc",
     "postinstall": "npm run build",
     "start": "npm run build && node dist/index.js",
-    "dev": "npm run build && node dist/index.js --tether.host=tether-io.dev --loglevel=debug --pm2.enabled=false --datadog.enabled=false --ping.interval=3000"
+    "dev": "npm run build && node dist/index.js --targetAppName=dummy --tether.host=tether-io.dev --loglevel=debug --pm2.enabled=false --datadog.enabled=false --ping.interval=3000",
+    "devDatadog": "npm run build && node dist/index.js --targetAppName=dummy --tether.host=tether-io.dev --loglevel=debug --pm2.enabled=false --datadog.enabled=true --ping.interval=3000"
   },
   "author": "",
   "license": "ISC",

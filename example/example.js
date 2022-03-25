@@ -23,4 +23,4 @@ const main = async (failProbability) => {
   });
 };
 
-main(0);
+main(0.25);

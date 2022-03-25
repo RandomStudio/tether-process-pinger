@@ -4,6 +4,7 @@ import { ProcessDescription } from "pm2";
 export interface Config {
   loglevel: string;
   tether: IClientOptions;
+  targetAppName: string;
   ping: {
     interval: number;
     timeout: number;

@@ -1,6 +1,7 @@
 import { Config } from "./types";
 
 const defaults: Config = {
+  targetAppName: "unknown",
   tether: {
     host: "localhost",
   },
