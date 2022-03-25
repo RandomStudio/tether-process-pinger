@@ -1,0 +1,24 @@
+{
+  "apps": [
+    {
+      "name": "pinger",
+      "script": "index.js",
+      "args": [
+        "--targetAppName=dummy",
+        "--pm2.processName=dummy",
+        "--tether.host=tether-io.dev",
+        "--loglevel=debug",
+        "--pm2.enabled=true",
+        "--datadog.enabled=true",
+        "--ping.interval=3000"
+      ],
+      "cwd": "./dist"
+    },
+    {
+      "name": "dummy",
+      "script": "example.js",
+      "args": [],
+      "cwd": "./example"
+    }
+  ]
+}

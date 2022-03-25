@@ -112,6 +112,19 @@ const handleTimeout = (
     logger.warn(
       `PM2 integration enabled; will attempt to restart process "${processName}"`
     );
+    pm2.restart(state.targetProcess.name, (err, proc) => {
+      if (err) {
+        logger.error("PM2 failed to restart the process:", { err, proc });
+        pauseThenExit(1);
+      } else {
+        logger.info("Restart (apparently) succeeded");
+        logger.debug({ proc, targetProcess: state.targetProcess });
+
+        // Allow next ping to be sent, hopefully will get response when
+        // application completes restart
+        state.lastPingSentTime = null;
+      }
+    });
     if (datadog) {
       datadog.increment("restartProcess");
     }

@@ -11,7 +11,7 @@ const defaults: Config = {
   },
   pm2: {
     enabled: true,
-    processName: "browser",
+    processName: "unknown",
   },
   datadog: {
     enabled: true,
