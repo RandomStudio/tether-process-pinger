@@ -2,7 +2,12 @@ import { IClientOptions } from "@tether/tether-agent";
 import { ProcessDescription } from "pm2";
 
 export interface Config {
-  loglevel: string;
+  loglevel: 'trace'
+        | 'debug'
+        | 'info'
+        | 'warn'
+        | 'error'
+        | 'silent'; // allow only string values that work with loglevel package
   tether: IClientOptions;
   targetAppName: string;
   ping: {
