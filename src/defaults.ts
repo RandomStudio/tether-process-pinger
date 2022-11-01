@@ -4,7 +4,6 @@ const defaults: Config = {
   targetAppName: "unknown",
   tether: {
     host: "localhost",
-    clientId: 'mqttjs_' + Math.random().toString(16).substring(2, 10),
   },
   ping: {
     interval: 15 * 1000,

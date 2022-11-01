@@ -31,7 +31,7 @@ More generally, you need to implement your applications (and systems) in such a 
 It may occur that you desire or require multiple apps to be monitored, and so want to run multiple instances of this agent.  
 In such a case, you can provide a `ping.tetherAgentId` configuration, which ensures that the process-pinger will only respond to pong messages from the agent with the specified agent ID.
 
-If in your target apps you would additionally like to distinguish between ping messages from different instances of the process-pinger agent, so as to prevent each app from responding to each ping of each process-pinger instance, you can do so by providing a `tether.clientId`. If provided, this will be used as the agent ID for that process-pinger instance, allowing for targeted subscriptions.
+If in your target apps you would additionally like to distinguish between ping messages from different instances of the process-pinger agent, so as to prevent each app from responding to each ping of each process-pinger instance, you can do so by providing a `tether.agentId`. If provided, this will be used as the agent ID for that process-pinger instance, allowing for targeted subscriptions.
 
 ## Optional, but recommended: PM2 Integration
 
