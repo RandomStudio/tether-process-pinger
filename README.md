@@ -26,6 +26,13 @@ The only requirements on the target application are:
 
 More generally, you need to implement your applications (and systems) in such a way that a restart is **anticipated, even if it is not desirable**. Critical state information should preferably not get lost in the case of a restart at an awkward moment. "The show must go on"; your application should hopefully be back up and running as quickly as possible, and the rest of the system should be robust enough to either start over or pick up where you left off.
 
+### Running multiple instances
+
+It may occur that you desire or require multiple apps to be monitored, and so want to run multiple instances of this agent.  
+In such a case, you can provide a `ping.tetherAgentId` configuration, which ensures that the process-pinger will only respond to pong messages from the agent with the specified agent ID.
+
+If in your target apps you would additionally like to distinguish between ping messages from different instances of the process-pinger agent, so as to prevent each app from responding to each ping of each process-pinger instance, you can do so by providing a `tether.agentId`. If provided, this will be used as the agent ID for that process-pinger instance, allowing for targeted subscriptions.
+
 ## Optional, but recommended: PM2 Integration
 
 PM2 integration can be disabled, e.g. for testing and development of this library.

@@ -164,7 +164,8 @@ const main = async () => {
     setupPm2();
   }
 
-  const agent = await TetherAgent.create("processPinger", config.tether);
+  const { agentId, ...clientOptions } = config.tether;
+  const agent = await TetherAgent.create("processPinger", clientOptions, config.loglevel, agentId);
 
   const pingOutput = agent.createOutput("ping");
 
