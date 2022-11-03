@@ -165,64 +165,69 @@ const main = async () => {
   }
 
   const { agentId, ...clientOptions } = config.tether;
-  const agent = await TetherAgent.create("processPinger", clientOptions, config.loglevel, agentId);
+  try {
+    const agent = await TetherAgent.create("processPinger", clientOptions, config.loglevel, agentId);
 
-  const pingOutput = agent.createOutput("ping");
+    const pingOutput = agent.createOutput("ping");
 
-  setInterval(() => {
-    const now = Date.now();
-    if (state.lastPingSentTime === null) {
-      logger.debug("Sending ping at", now);
-      state.lastPingSentTime = now;
-      pingOutput.publish(); // empty message
-    } else {
-      logger.warn(
-        "lastPingSentTime has not been reset; still waiting for reply?"
-      );
-      handleTimeout(
-        now - state.lastPingSentTime,
-        config.ping.timeout,
-        pingOutput
-      );
-    }
-  }, config.ping.interval);
-
-  const pongInput = agent.createInput(
-    "pong",
-    config.ping.tetherAgentId !== undefined
-      ? `+/${config.ping.tetherAgentId}/pong`
-      : undefined
-  );
-
-  pongInput.onMessage((payload, topic) => {
-    if (state.lastPingSentTime === null) {
-      logger.debug("No ping sent from here; ignore this pong");
-    } else {
+    setInterval(() => {
       const now = Date.now();
-      const elapsed = now - state.lastPingSentTime;
-      const { timeout } = config.ping;
-      logger.info(`Received pong message on topic ${topic}`);
-      logger.debug(`${elapsed}ms between ping => pong`);
-
-      state.lastPingSentTime = now;
-
-      if (datadog) {
-        datadog.gauge("ping", elapsed);
-      }
-      if (elapsed <= timeout) {
-        logger.info("All good; reset for next ping interval");
-        state.lastPingSentTime = null;
-        if (datadog) {
-          datadog.increment("heartbeat");
-        }
-        if (payload.length > 0) {
-          decodeResponseBody(payload);
-        }
+      if (state.lastPingSentTime === null) {
+        logger.debug("Sending ping at", now);
+        state.lastPingSentTime = now;
+        pingOutput.publish(); // empty message
       } else {
-        handleTimeout(elapsed, timeout, pingOutput);
+        logger.warn(
+          "lastPingSentTime has not been reset; still waiting for reply?"
+        );
+        handleTimeout(
+          now - state.lastPingSentTime,
+          config.ping.timeout,
+          pingOutput
+        );
       }
-    }
-  });
+    }, config.ping.interval);
+
+    const pongInput = agent.createInput(
+      "pong",
+      config.ping.tetherAgentId !== undefined
+        ? `+/${config.ping.tetherAgentId}/pong`
+        : undefined
+    );
+
+    pongInput.onMessage((payload, topic) => {
+      if (state.lastPingSentTime === null) {
+        logger.debug("No ping sent from here; ignore this pong");
+      } else {
+        const now = Date.now();
+        const elapsed = now - state.lastPingSentTime;
+        const { timeout } = config.ping;
+        logger.info(`Received pong message on topic ${topic}`);
+        logger.debug(`${elapsed}ms between ping => pong`);
+
+        state.lastPingSentTime = now;
+
+        if (datadog) {
+          datadog.gauge("ping", elapsed);
+        }
+        if (elapsed <= timeout) {
+          logger.info("All good; reset for next ping interval");
+          state.lastPingSentTime = null;
+          if (datadog) {
+            datadog.increment("heartbeat");
+          }
+          if (payload.length > 0) {
+            decodeResponseBody(payload);
+          }
+        } else {
+          handleTimeout(elapsed, timeout, pingOutput);
+        }
+      }
+    });
+  } catch (err) {
+    logger.error(`Cannot create Tether agent.`, err);
+    process.exit(-1);
+  }
 };
 
 // =================================================================
